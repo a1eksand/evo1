@@ -1,6 +1,7 @@
 package universe.impl;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,8 +15,9 @@ import static universe.Field.ACTION_COST_MOVE;
 import static universe.Field.ACTION_COST_REGENERATE;
 import static universe.Field.ACTION_COST_ROTATE;
 import static universe.Field.ACTION_SLEEP_PRISE;
+import utils.Utils;
 
-public class Cell implements Supplier<Color> {
+public class Cell implements Supplier<Color>, Serializable {
 
   static final int NET_SIZE = 7;
   static final int INPUT_SIZE = 7;

@@ -2,7 +2,7 @@ package netbase;
 
 import java.util.Objects;
 import java.util.Random;
-import static universe.impl.Utils.toStringView;
+import static utils.Utils.toStringView;
 
 public class NetTest {
 

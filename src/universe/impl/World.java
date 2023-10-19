@@ -1,14 +1,21 @@
 package universe.impl;
 
 import java.awt.Color;
+import java.io.OutputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import universe.Field;
+import utils.Utils;
 
-public class World implements Field {
+public class World implements Field, Serializable {
+
+  @Serial
+  private static final long serialVersionUID = -5537671945950711884L;
 
   private final Cell[][] field;
   private final Supplier<Color>[][] state;
@@ -52,6 +59,11 @@ public class World implements Field {
     for (int i = 0; i < updaters.length; i++) {
       updaters[i] = new Updater(i, set);
     }
+  }
+
+  @Override
+  public synchronized void save(OutputStream out) {
+    Utils.serialize(this, out);
   }
 
   private int update(int x1, int x2, int y1, int y2, long s) {

@@ -1,10 +1,13 @@
 package universe;
 
 import java.awt.Color;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Random;
 import java.util.concurrent.RecursiveTask;
 import java.util.function.Supplier;
 import universe.impl.Cell;
+import utils.Utils;
 import universe.impl.World;
 
 public interface Field {
@@ -31,9 +34,15 @@ public interface Field {
     return w;
   }
 
+  static Field load(InputStream in) {
+    return Utils.deserialize(in);
+  }
+
   Supplier<Color>[][] getState();
 
   long getStep();
 
   void updaters(RecursiveTask<Integer>[] updaters);
+
+  void save(OutputStream out);
 }

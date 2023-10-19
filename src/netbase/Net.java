@@ -1,10 +1,11 @@
 package netbase;
 
+import java.io.Serializable;
 import java.util.Random;
 import netbase.impl.NeuralNet;
 import netbase.impl.DoubleIterator;
 
-public class Net {
+public class Net implements Serializable {
   private final NeuralNet nn;
   private final double[] signature;
 
@@ -19,10 +20,10 @@ public class Net {
   private Net(int size, int inputSize, int outputSize, DoubleIterator doubleIterator) {
     int[] numberOfHiddenNeurons = {size, size, size, size};
     ActivationFunction[] hiddenAcFnc = {
-        new Sigmoid(doubleIterator.nextDouble()),
-        new Sigmoid(doubleIterator.nextDouble()),
-        new Sigmoid(doubleIterator.nextDouble()),
-        new Sigmoid(doubleIterator.nextDouble())};
+        new Linear(doubleIterator.nextDouble()),
+        new Linear(doubleIterator.nextDouble()),
+        new Linear(doubleIterator.nextDouble()),
+        new Linear(doubleIterator.nextDouble())};
     var outputAcFnc = new Linear(doubleIterator.nextDouble());
     nn = new NeuralNet(
         inputSize,

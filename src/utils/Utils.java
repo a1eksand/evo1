@@ -1,10 +1,12 @@
-package universe.impl;
+package utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 
 public class Utils {
@@ -18,8 +20,24 @@ public class Utils {
     }
   }
 
-  public static <T> T deserialize(byte[] object) {
-    try (ByteArrayInputStream bis = new ByteArrayInputStream(object); ObjectInputStream ois = new ObjectInputStream(bis)) {
+  public static <T> T deserialize(byte[] data) {
+    try (ByteArrayInputStream bis = new ByteArrayInputStream(data); ObjectInputStream ois = new ObjectInputStream(bis)) {
+      return  (T) ois.readObject();
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void serialize(Serializable object, OutputStream out) {
+    try (ObjectOutputStream oos = new ObjectOutputStream(out)) {
+      oos.writeObject(object);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static <T> T deserialize(InputStream in) {
+    try (ObjectInputStream ois = new ObjectInputStream(in)) {
       return  (T) ois.readObject();
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);

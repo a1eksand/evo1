@@ -69,8 +69,8 @@ public class Canvas extends JComponent implements MouseMotionListener, MouseList
     int line = 1;
     g.setPaint(Color.white);
     g.drawString("%.2f".formatted(1_000. / (time1 - time3)), getWidth() - UI_WIDTH, line++ * UI_HEIGHT);
-    g.drawString("%.2f".formatted(stats[IPF]), getWidth() - UI_WIDTH, line++ * UI_HEIGHT);
-    g.drawString("%s".formatted(formatCount(stats[IPF] * stats[CELL_COUNT])), getWidth() - UI_WIDTH, line++ * UI_HEIGHT);
+    g.drawString("%.2f".formatted(stats[IPS]), getWidth() - UI_WIDTH, line++ * UI_HEIGHT);
+    g.drawString("%s".formatted(formatCount(stats[IPS] * stats[CELL_COUNT])), getWidth() - UI_WIDTH, line++ * UI_HEIGHT);
     g.drawString("x: %d".formatted(cx), getWidth() - UI_WIDTH, line++ * UI_HEIGHT);
     g.drawString("y: %d".formatted(cy), getWidth() - UI_WIDTH, line++ * UI_HEIGHT);
     g.drawString("s: %d".formatted(scale), getWidth() - UI_WIDTH, line++ * UI_HEIGHT);
