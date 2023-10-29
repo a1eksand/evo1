@@ -28,7 +28,7 @@ public class NetTest {
   }
 
   static Net testNet(Random random) {
-    return new Net(10, 10, 6, random);
+    return new Net(10, 10, 6, random, Sigmoid::new);
   }
 }
 

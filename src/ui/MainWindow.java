@@ -7,14 +7,16 @@ import java.nio.file.Path;
 import java.util.Scanner;
 import javax.swing.JFrame;
 import universe.Field;
+import utils.Logger;
 
 public class MainWindow extends JFrame {
 
   static private final String HELP = """
       stop - pause simulation
       start - resume simulation
-      save FILE - save simulation to file
+      save [PREFIX] - save simulation to file
       load FILE - load simulation from file
+      logger [CLASS LEVEL] - show / set logging level
       """;
 
   public static void main(String[] args) throws IOException {
@@ -32,11 +34,9 @@ public class MainWindow extends JFrame {
 
     var input = new Scanner(System.in);
     System.out.print(HELP);
-    System.out.print("> ");
     while (input.hasNextLine()) {
-      System.out.print("> ");
       var cmd = input.nextLine().trim().split("\\s+");
-      switch (cmd[0]) {
+      switch (cmd[0].toLowerCase()) {
         case "stop" -> orc.pause();
         case "start" -> orc.resume();
         case "save" -> orc.serialize(Files.newOutputStream(Path.of((cmd.length > 1 ? cmd[1] : "") + System.currentTimeMillis() + ".state")));
@@ -44,6 +44,13 @@ public class MainWindow extends JFrame {
           orc.stop();
           orc = new Orchestrator(Field.load(Files.newInputStream(Path.of(cmd[1]))), canvas);
           orc.start();
+        }
+        case "logger" -> {
+          if (cmd.length > 1) {
+            Logger.Factory.setLevel(cmd[1], cmd[2]);
+          } else {
+            System.out.println(String.join("\n", Logger.Factory.getLevels()));
+          }
         }
         default -> System.out.print(HELP);
       }

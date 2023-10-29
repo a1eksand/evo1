@@ -1,6 +1,7 @@
 package universe.impl;
 
 import java.awt.Color;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Random;
@@ -15,10 +16,15 @@ import static universe.Field.ACTION_COST_MOVE;
 import static universe.Field.ACTION_COST_REGENERATE;
 import static universe.Field.ACTION_COST_ROTATE;
 import static universe.Field.ACTION_SLEEP_PRISE;
+import utils.Logger;
 import utils.Utils;
 
 public class Cell implements Supplier<Color>, Serializable {
 
+  @Serial
+  private static final long serialVersionUID = -2893434248830474937L;
+
+  static final Logger LOGGER = Logger.Factory.getLogger(Cell.class);
   static final int NET_SIZE = 7;
   static final int INPUT_SIZE = 7;
   static final int OUTPUT_SIZE = 7;
@@ -114,7 +120,7 @@ public class Cell implements Supplier<Color>, Serializable {
       if (max == outputs[i]) {
         switch (i) {
           case OUTPUT_MOVE -> move(world, x, y, front);
-          case OUTPUT_ROTATE -> rotate();
+          case OUTPUT_ROTATE -> rotate1();
           case OUTPUT_SLEEP -> sleep();
           case OUTPUT_ATTACK1 -> attack1(world, x, y, front);
           case OUTPUT_ATTACK2 -> attack2(world, x, y, front);
@@ -126,16 +132,19 @@ public class Cell implements Supplier<Color>, Serializable {
   }
 
   private void move(World world, int x, int y, Cell that) {
+    LOGGER.trace("0x%016X: %s", getId(), "try move");
     int x2 = x + direction.x;
     int y2 = y + direction.y;
     if (Objects.isNull(that)) {
+      LOGGER.trace("0x%016X: %s", getId(), "move");
       if (world.move(x, y, x2, y2)) {
         energy -= ACTION_COST_MOVE;
       }
     }
   }
 
-  private void rotate() {
+  private void rotate1() {
+    LOGGER.trace("0x%016X: %s", getId(), "rotate1");
     while (true) {
       var d = DIRECTIONS1[rnd.nextInt(DIRECTIONS1.length)];
       if (direction != d) {
@@ -146,14 +155,28 @@ public class Cell implements Supplier<Color>, Serializable {
     }
   }
 
+  private void rotate2() {
+    LOGGER.trace("0x%016X: %s", getId(), "rotate2");
+    while (true) {
+      var d = DIRECTIONS1[rnd.nextInt(DIRECTIONS1.length)];
+      if (direction != d) {
+        direction = d;
+        break;
+      }
+    }
+  }
+
   private void sleep() {
+    LOGGER.trace("0x%016X: %s", getId(), "sleep");
     energy += ACTION_SLEEP_PRISE;
   }
 
   private void attack1(World world, int x, int y, Cell that) {
+    LOGGER.trace("0x%016X: %s", getId(), "try attack1");
     int x2 = x + direction.x;
     int y2 = y + direction.y;
     if (Objects.nonNull(that)) {
+      LOGGER.trace("0x%016X: %s > 0x%016X", getId(), "attack1", that.getId());
       if (that.energy < energy) {
         energy += that.energy - ACTION_COST_ATTACK_1;
         world.clear(x2, y2);
@@ -165,9 +188,11 @@ public class Cell implements Supplier<Color>, Serializable {
   }
 
   private void attack2(World world, int x, int y, Cell that) {
+    LOGGER.trace("0x%016X: %s", getId(), "try attack2");
     int x2 = x + direction.x;
     int y2 = y + direction.y;
     if (Objects.nonNull(that)) {
+      LOGGER.trace("0x%016X: %s > 0x%016X", getId(), "attack2", that.getId());
       if (that.energy < ACTION_ATTACK_2_PRISE) {
         energy += that.energy - ACTION_COST_ATTACK_2;
         world.clear(x2, y2);
@@ -179,14 +204,16 @@ public class Cell implements Supplier<Color>, Serializable {
   }
 
   private void divide(World world, int x, int y, Cell that) {
+    LOGGER.trace("0x%016X: %s", getId(), "try divide");
     int x2 = x + direction.x;
     int y2 = y + direction.y;
     if (Objects.isNull(that)) {
+      LOGGER.trace("0x%016X: %s", getId(), "divide");
       if (world.add(new Cell(rnd, new Net(NET_SIZE, INPUT_SIZE, OUTPUT_SIZE, mutate(net.getSignature())), energy / 2), x2, y2)) {
         energy /= 2;
       }
     } else {
-      rotate();
+      rotate2();
     }
   }
 
@@ -202,10 +229,16 @@ public class Cell implements Supplier<Color>, Serializable {
   }
 
   private void regenerate(Cell that) {
+    LOGGER.trace("0x%016X: %s", getId(), "try regenerate");
     if (Objects.nonNull(that)) {
+      LOGGER.trace("0x%016X: %s > 0x%016X", getId(), "regenerate", that.getId());
       that.energy += ACTION_COST_REGENERATE;
       energy -= ACTION_COST_REGENERATE;
     }
+  }
+
+  private long getId() {
+    return (long)color.getRGB() << 32 | (long)super.hashCode();
   }
 
   @Override
