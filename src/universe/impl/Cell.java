@@ -14,7 +14,8 @@ import static universe.Field.ACTION_COST_ATTACK_1;
 import static universe.Field.ACTION_COST_ATTACK_2;
 import static universe.Field.ACTION_COST_MOVE;
 import static universe.Field.ACTION_COST_REGENERATE;
-import static universe.Field.ACTION_COST_ROTATE;
+import static universe.Field.ACTION_COST_ROTATE_1;
+import static universe.Field.ACTION_COST_ROTATE_2;
 import static universe.Field.ACTION_SLEEP_PRISE;
 import utils.Logger;
 import utils.Utils;
@@ -61,6 +62,10 @@ public class Cell implements Supplier<Color>, Serializable {
 
   public Cell(Random rnd) {
     this(rnd, new Net(NET_SIZE, INPUT_SIZE, OUTPUT_SIZE, rnd), Field.INITIAL_ENERGY);
+  }
+
+  public Cell(Random rnd, double[] signature) {
+    this(rnd, new Net(NET_SIZE, INPUT_SIZE, OUTPUT_SIZE, signature), Field.INITIAL_ENERGY);
   }
 
   Cell(Random rnd, Net net, int energy) {
@@ -136,8 +141,8 @@ public class Cell implements Supplier<Color>, Serializable {
     int x2 = x + direction.x;
     int y2 = y + direction.y;
     if (Objects.isNull(that)) {
-      LOGGER.trace("0x%016X: %s", getId(), "move");
       if (world.move(x, y, x2, y2)) {
+        LOGGER.trace("0x%016X: %s", getId(), "move");
         energy -= ACTION_COST_MOVE;
       }
     }
@@ -149,7 +154,7 @@ public class Cell implements Supplier<Color>, Serializable {
       var d = DIRECTIONS1[rnd.nextInt(DIRECTIONS1.length)];
       if (direction != d) {
         direction = d;
-        energy -= ACTION_COST_ROTATE;
+        energy -= ACTION_COST_ROTATE_1;
         break;
       }
     }
@@ -161,6 +166,7 @@ public class Cell implements Supplier<Color>, Serializable {
       var d = DIRECTIONS1[rnd.nextInt(DIRECTIONS1.length)];
       if (direction != d) {
         direction = d;
+        energy -= ACTION_COST_ROTATE_2;
         break;
       }
     }
@@ -179,7 +185,9 @@ public class Cell implements Supplier<Color>, Serializable {
       LOGGER.trace("0x%016X: %s > 0x%016X", getId(), "attack1", that.getId());
       if (that.energy < energy) {
         energy += that.energy - ACTION_COST_ATTACK_1;
-        world.clear(x2, y2);
+        that.energy = 0;
+        world.clear(x2, y2, that);
+
       } else {
         that.energy -= energy;
         energy *= 2;
@@ -195,7 +203,8 @@ public class Cell implements Supplier<Color>, Serializable {
       LOGGER.trace("0x%016X: %s > 0x%016X", getId(), "attack2", that.getId());
       if (that.energy < ACTION_ATTACK_2_PRISE) {
         energy += that.energy - ACTION_COST_ATTACK_2;
-        world.clear(x2, y2);
+        that.energy = 0;
+        world.clear(x2, y2, that);
       } else {
         that.energy -= ACTION_ATTACK_2_PRISE;
         energy += ACTION_ATTACK_2_PRISE - ACTION_COST_ATTACK_2;
@@ -208,8 +217,8 @@ public class Cell implements Supplier<Color>, Serializable {
     int x2 = x + direction.x;
     int y2 = y + direction.y;
     if (Objects.isNull(that)) {
-      LOGGER.trace("0x%016X: %s", getId(), "divide");
       if (world.add(new Cell(rnd, new Net(NET_SIZE, INPUT_SIZE, OUTPUT_SIZE, mutate(net.getSignature())), energy / 2), x2, y2)) {
+        LOGGER.trace("0x%016X: %s", getId(), "divide");
         energy /= 2;
       }
     } else {
@@ -244,6 +253,10 @@ public class Cell implements Supplier<Color>, Serializable {
   @Override
   public Color get() {
     return color;
+  }
+
+  double[] getSignature() {
+    return net.getSignature();
   }
 
   private enum D1 {

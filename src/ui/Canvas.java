@@ -57,8 +57,12 @@ public class Canvas extends JComponent implements MouseMotionListener, MouseList
     for (int x = 0; x < state.length; x++) {
       for (int y = 0; y < state[x].length; y++) {
         if (Objects.nonNull(state[x][y])) {
-          g.setPaint(state[x][y].get());
-          g.fillRect(x * scale + cx, y * scale + cy, scale, scale);
+          int x1 = x * scale + cx;
+          int y1 = y * scale + cy;
+          if (x1 + scale >= 0 && x1 < getWidth() && y1 + scale >= 0 && y1 < getHeight()) {
+            g.setPaint(state[x][y].get());
+            g.fillRect(x1, y1, scale, scale);
+          }
         }
       }
     }

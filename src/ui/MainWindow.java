@@ -14,7 +14,8 @@ public class MainWindow extends JFrame {
   static private final String HELP = """
       stop - pause simulation
       start - resume simulation
-      save [PREFIX] - save simulation to file
+      save [PREFIX] - save simulation to jsd file
+      snap [PREFIX] - save simulation to csv file
       load FILE - load simulation from file
       logger [CLASS LEVEL] - show / set logging level
       """;
@@ -29,7 +30,7 @@ public class MainWindow extends JFrame {
     var canvas = new Canvas();
     window.add(canvas);
 
-    var orc = new Orchestrator(Field.rnd(Field.SEED, 1000, 10000), canvas);
+    var orc = new Orchestrator(Field.rnd(Field.SEED, Field.SIZE, 10 * Field.SIZE), canvas);
     orc.start();
 
     var input = new Scanner(System.in);
@@ -39,10 +40,19 @@ public class MainWindow extends JFrame {
       switch (cmd[0].toLowerCase()) {
         case "stop" -> orc.pause();
         case "start" -> orc.resume();
-        case "save" -> orc.serialize(Files.newOutputStream(Path.of((cmd.length > 1 ? cmd[1] : "") + System.currentTimeMillis() + ".state")));
+        case "save" -> orc.getField().serialize(Files.newOutputStream(Path.of((cmd.length > 1 ? cmd[1] : "") + System.currentTimeMillis() + ".state.jsd")));
+        case "snap" -> orc.getField().snapshot(Files.newBufferedWriter(Path.of((cmd.length > 1 ? cmd[1] : "") + System.currentTimeMillis() + ".state.csv")));
         case "load" -> {
           orc.stop();
-          orc = new Orchestrator(Field.load(Files.newInputStream(Path.of(cmd[1]))), canvas);
+          var file = cmd[1];
+          if (file.contains(".state.jsd")) {
+            orc = new Orchestrator(Field.load(Files.newInputStream(Path.of(cmd[1]))), canvas);
+          } else if (file.contains(".state.csv")) {
+            orc = new Orchestrator(Field.load(Files.newBufferedReader(Path.of(cmd[1])), Field.SEED, Field.SIZE), canvas);
+          } else {
+            System.out.println("Unknown file type.");
+            orc = new Orchestrator(orc.getField(), canvas);
+          }
           orc.start();
         }
         case "logger" -> {

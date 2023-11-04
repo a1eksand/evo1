@@ -31,6 +31,7 @@ public class Utils {
   public static void serialize(Serializable object, OutputStream out) {
     try (ObjectOutputStream oos = new ObjectOutputStream(out)) {
       oos.writeObject(object);
+      oos.flush();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -1,6 +1,8 @@
 package universe.impl;
 
 import java.awt.Color;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serial;
 import java.io.Serializable;
@@ -29,7 +31,7 @@ public class World implements Field, Serializable {
     this.rnd = rnd;
   }
 
-  public void addCell(Cell cell) {
+  public synchronized void addCell(Cell cell) {
     while (true) {
       int x = rnd.nextInt(field.length);
       int y = rnd.nextInt(field.length);
@@ -40,8 +42,12 @@ public class World implements Field, Serializable {
     }
   }
 
+  public synchronized void addCell(Cell cell, int x, int y) {
+    field[x][y] = cell;
+  }
+
   @Override
-  synchronized public Supplier<Color>[][] getState() {
+  public synchronized Supplier<Color>[][] getState() {
     for (int x = 0; x < field.length; x++) {
       System.arraycopy(field[x], 0, state[x], 0, field.length);
     }
@@ -62,8 +68,35 @@ public class World implements Field, Serializable {
   }
 
   @Override
-  public synchronized void save(OutputStream out) {
+  public synchronized void serialize(OutputStream out) {
     Utils.serialize(this, out);
+  }
+
+  @Override
+  public synchronized void snapshot(BufferedWriter out) {
+    try {
+      for (int x = 0; x < field.length; x++) {
+        for (int y = 0; y < field[x].length; y++) {
+          if (Objects.nonNull(field[x][y])) {
+            var sig = field[x][y].getSignature();
+            out.write(String.valueOf(x));
+            out.write(",");
+            out.write(String.valueOf(y));
+            out.write(",");
+            for (int i = 0; i < sig.length; i++) {
+              out.write(String.valueOf(sig[i]));
+              if (i != sig.length - 1) {
+                out.write(",");
+              }
+            }
+            out.write("\n");
+          }
+        }
+      }
+      out.flush();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private int update(int x1, int x2, int y1, int y2, long s) {
@@ -79,8 +112,10 @@ public class World implements Field, Serializable {
     return count;
   }
 
-  synchronized Cell get(int x, int y) {
-    return field[x(x)][y(y)];
+  synchronized Cell get(int x2, int y2) {
+    x2 = x(x2);
+    y2 = y(y2);
+    return field[x2][y2];
   }
 
   synchronized boolean move(int x1, int y1, int x2, int y2) {
@@ -104,8 +139,16 @@ public class World implements Field, Serializable {
     return true;
   }
 
-  synchronized void clear(int x, int y) {
-    field[x(x)][y(y)] = null;
+  synchronized void clear(int x1, int y1) {
+    field[x1][y1] = null;
+  }
+
+  synchronized void clear(int x2, int y2, Cell cell) {
+    x2 = x(x2);
+    y2 = y(y2);
+    if (field[x2][y2] == cell) {
+      field[x2][y2] = null;
+    }
   }
 
   private int x(int x) {

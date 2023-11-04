@@ -1,7 +1,6 @@
 package ui;
 
 import java.awt.Color;
-import java.io.OutputStream;
 import java.util.concurrent.RecursiveTask;
 import java.util.function.Supplier;
 import universe.Field;
@@ -81,8 +80,8 @@ public class Orchestrator {
     isPaused = false;
   }
 
-  public void serialize(OutputStream out) {
-    field.save(out);
+  Field getField() {
+    return field;
   }
 
   interface Renderer {
