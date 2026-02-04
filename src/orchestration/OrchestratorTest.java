@@ -19,7 +19,7 @@ public class OrchestratorTest {
   public static void main(String[] args) throws IOException {
     TLRandom rnd;
     TestableOrchestrator orc;
-    orc = new TestableOrchestrator(Field.rnd(rnd = new TLRandom(73), FIELD_SIZE, 20 * FIELD_SIZE), new TestableRenderer(), new SeveralSingleThreadExecutorUpdater(FIELD_SIZE, CCC).init(rnd));
+    orc = new TestableOrchestrator(Field.create(rnd = new TLRandom(73), FIELD_SIZE, 20 * FIELD_SIZE), new TestableRenderer(), new SeveralSingleThreadExecutorUpdater(FIELD_SIZE, CCC).init(rnd));
     orc.setFps(1);
     orc.start();
     startTestTime = System.currentTimeMillis();
@@ -33,7 +33,7 @@ public class OrchestratorTest {
     orc = null;
     System.gc();
 
-    orc = new TestableOrchestrator(Field.load(Files.newBufferedReader(Path.of("OrchestratorTest1.csv")), rnd = new TLRandom(Field.SEED), Field.SIZE), new TestableRenderer(), new SeveralSingleThreadExecutorUpdater(Field.SIZE, CCC).init(rnd));
+    orc = new TestableOrchestrator(Field.create(Files.newBufferedReader(Path.of("OrchestratorTest1.csv")), rnd = new TLRandom(Field.SEED), Field.SIZE), new TestableRenderer(), new SeveralSingleThreadExecutorUpdater(Field.SIZE, CCC).init(rnd));
     orc.setFps(1);
     orc.start();
     startTestTime = System.currentTimeMillis();

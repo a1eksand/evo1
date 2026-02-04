@@ -39,7 +39,7 @@ public class MainWindow extends JFrame {
     var canvas = new Canvas();
     window.add(canvas);
 
-    var orc = new Orchestrator(Field.rnd(rnd = new TLRandom(Field.SEED), Field.SIZE, 10 * Field.SIZE), canvas, new SeveralSingleThreadExecutorUpdater(Field.SIZE, CONCURRENCY_LEVEL).init(rnd));
+    var orc = new Orchestrator(Field.create(rnd = new TLRandom(Field.SEED), Field.SIZE, 10 * Field.SIZE), canvas, new SeveralSingleThreadExecutorUpdater(Field.SIZE, CONCURRENCY_LEVEL).init(rnd));
     orc.start();
 
     var input = new Scanner(System.in);
@@ -58,11 +58,11 @@ public class MainWindow extends JFrame {
           if (file.contains(".state.jsd")) {
             orc = null;
             System.gc();
-            orc = new Orchestrator(Field.load(Files.newInputStream(Path.of(cmd[CMD_INDEX + 1]))), canvas, new SeveralSingleThreadExecutorUpdater(Field.SIZE, CONCURRENCY_LEVEL));
+            orc = new Orchestrator(Field.create(Files.newInputStream(Path.of(cmd[CMD_INDEX + 1]))), canvas, new SeveralSingleThreadExecutorUpdater(Field.SIZE, CONCURRENCY_LEVEL));
           } else if (file.contains(".state.csv")) {
             orc = null;
             System.gc();
-            orc = new Orchestrator(Field.load(Files.newBufferedReader(Path.of(cmd[CMD_INDEX + 1])), rnd = new TLRandom(Field.SEED), Field.SIZE), canvas, new SeveralSingleThreadExecutorUpdater(Field.SIZE, CONCURRENCY_LEVEL).init(rnd));
+            orc = new Orchestrator(Field.create(Files.newBufferedReader(Path.of(cmd[CMD_INDEX + 1])), rnd = new TLRandom(Field.SEED), Field.SIZE), canvas, new SeveralSingleThreadExecutorUpdater(Field.SIZE, CONCURRENCY_LEVEL).init(rnd));
           } else {
             System.out.println("Unknown file type.");
             orc = new Orchestrator(orc.getField(), canvas, new SeveralSingleThreadExecutorUpdater(Field.SIZE, CONCURRENCY_LEVEL));

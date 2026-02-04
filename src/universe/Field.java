@@ -17,7 +17,7 @@ public interface Field {
   long SEED = 37;
   int SIZE = 1024;
 
-  static Field rnd(Supplier<RandomGenerator> rnd, int fieldSize, int initialCellCount) {
+  static Field create(Supplier<RandomGenerator> rnd, int fieldSize, int initialCellCount) {
     var world = new FieldImpl(fieldSize, rnd);
     for (int i = 0; i < initialCellCount; i++) {
       world.addCell(new CellImpl(rnd, Var.INITIAL_ENERGY.defau1t));
@@ -25,11 +25,11 @@ public interface Field {
     return world;
   }
 
-  static Field load(InputStream in) {
+  static Field create(InputStream in) {
     return Utils.deserialize(in);
   }
 
-  static Field load(BufferedReader csv, Supplier<RandomGenerator> rnd, int fieldSize) {
+  static Field create(BufferedReader csv, Supplier<RandomGenerator> rnd, int fieldSize) {
     var world = new FieldImpl(fieldSize, rnd);
     csv.lines()
         .map(line -> line.split(","))
